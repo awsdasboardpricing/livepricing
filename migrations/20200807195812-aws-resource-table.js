@@ -15,13 +15,13 @@ exports.setup = function(options, seedLink) {
 };
 
 exports.up = function(db,callback) {
-  db.createTable("aws-resources", {
+  db.createTable("aws_resources", {
     id:{
       type: "int",
       primaryKey:true
     },
     resource_id:{
-      type: "string"
+      type: "text"
     }
   }, function(err){
     if (err) return callback(err);
