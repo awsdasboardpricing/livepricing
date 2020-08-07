@@ -11,6 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.17.1"
+    "db-migrate": "^0.11.11",
+    "db-migrate-pg": "^1.2.2",
+    "express": "^4.17.1",
+    "node-flywaydb": "^3.0.3"
   }
 }
