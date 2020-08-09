@@ -2,9 +2,9 @@
 
 const express = require('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
 const createUser = require('./create-user/create-user.js')
-const bodyParser = require('body-parser');
 
 // QUERY TABLE
 const sequelize = new Sequelize('hle', 'hle', 'vanmaibenem2829', {
@@ -34,13 +34,15 @@ const app = express();
 
 const port = 3000
 
+// MIDDLEWARE
 app.use(bodyParser.urlencoded({ extended: true }));
-
+app.use(bodyParser.json());
 app.use(cors())
 
+// ROUTES
 app.get('/', (req, res) => res.json({ message: 'Hello World' }))
 app.post('/signup', (req, res) => {
-    console.log(req.body)
+    createUser(req.body)
     res.json({ message: 'from signup' })
 })
 

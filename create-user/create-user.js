@@ -2,9 +2,9 @@ const User = require('../persist-user/persist-user.js')
 
 
 function createUser({
-    username, password, awsAccount
+    username, password, account
 }) {
-    User.create({username: username, password: password, aws_account: awsAccount})
+    User.create({username: username, password: password, aws_account: account})
 }
 
 module.exports = createUser;
