@@ -15,18 +15,28 @@ exports.setup = function(options, seedLink) {
 };
 
 exports.up = function(db,callback) {
-  db.createTable("aws_resources", {
+  db.createTable("user", {
     id:{
       type: "int",
-      primaryKey:true
+      primaryKey:true,
+      autoIncrement: true
     },
-    resource_id:{
-      type: "text"
+    username:{
+      type: "text",
+      notNull: true
+    },
+    password:{
+      type: "text",
+      notNull: true
+    },
+    aws_account: {
+      type: "text",
+      notNull: true
     }
   }, function(err){
     if (err) return callback(err);
     return callback()
-  })
+  });
 };
 
 exports.down = function(db) {
