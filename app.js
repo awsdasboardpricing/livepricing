@@ -5,7 +5,10 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
 const createUser = require('./create-user/create-user.js')
-var axios = require('axios');
+const axios = require('axios');
+const aws = require('aws-sdk');
+const zlib = require('zlib');
+
 
 // QUERY TABLE
 const sequelize = new Sequelize('hle', 'hle', 'vanmaibenem2829', {
@@ -40,7 +43,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cors({origin: true, credentials: true}));
 
-// ROUTES
+// REST ROUTES
 app.get('/', (req, res) => res.json({ message: 'Hello World' }))
 app.post('/signup', (req, res) => {
     createUser(req.body)
@@ -49,4 +52,24 @@ app.post('/signup', (req, res) => {
 
 app.get('/login', (req, res) => res.sendStatus(200))
 
+
+// ======Data ingestion from S3 to DB====
+const s3Params = {
+  accessKeyId: "AKIAJQLKFRY7XXKQQADQ",  /* required */ 
+  secretAccessKey: "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", /* required */ 
+  Bucket: 'hoang-le-personal-data-bucket'
+}
+const filePath = 'AWSLogs/261786166738/Config/us-east-2/2020/8/6/ConfigHistory/261786166738_Config_us-east-2_ConfigHistory_AWS::EC2::InternetGateway_20200806T183059Z_20200806T183059Z_1.json.gz'
+const s3 = new aws.S3(s3Params)
+const readStream = s3.getObject({
+  Bucket: s3Params.Bucket,
+  Key: filePath
+}).createReadStream().pipe(zlib.createGunzip())
+readStream.on('data', chunk => {
+  console.log('found data here')
+
+  console.log(chunk.toString('utf8'))
+})
+
+// Main app
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
