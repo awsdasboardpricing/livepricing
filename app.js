@@ -16,20 +16,6 @@ const sequelize = new Sequelize('hle', 'hle', 'vanmaibenem2829', {
     dialect: 'postgres' /* one of 'mysql' | 'mariadb' | 'postgres' | 'mssql' */
   }
 );
-// const AwsResource = sequelize.define('aws_resource', {
-//     // Model attributes are defined here
-//     id: {
-//       type: DataTypes.INTEGER,
-//       allowNull: false,
-//       primaryKey: true
-//     },
-//     resource_id: {
-//       type: DataTypes.STRING
-//     }
-//   }, {
-//     timestamps: false
-//   }
-// );
 
 // const firstModel = AwsResource.create({ id:1, resource_id: "resourceId1" })
 // ===== END WRITING DATA ON A TABLE ======
@@ -73,11 +59,50 @@ const readStream = s3.getObject({
   Key: filePath
 }).createReadStream().pipe(zlib.createGunzip())
 readStream.on('data', chunk => {
-  console.log('found data here')
-
-  console.log(chunk.toString('utf8'))
-  console.log(chunk.length)
+  const json = decodeChunk(chunk);
+  if(json != null) {
+    json.configurationItems.map(item => writeAwsConfig({resourceId: item.resourceId}))
+  }
+  return console.log("Done with this chunk")
 })
+
+// Json decoder
+function decodeChunk(chunk) {
+  try{
+    return JSON.parse(chunk.toString('utf8'))
+  } catch (error) {
+    console.log("Json decode byte stream failed")
+  }
+}
+// =================
+
+
+// DAO stuff
+const AwsResource = sequelize.define('aws_resource', {
+  // Model attributes are defined here
+  id: {
+    type: Sequelize.UUID,
+    allowNull: false,
+    primaryKey: true,
+    defaultValue: Sequelize.UUIDV4
+  },
+  resource_id: {
+    type: DataTypes.STRING
+  }
+}, {
+  timestamps: false
+}
+);
+
+// ALL DAO CALL NEEDS TO BE ASYNC AND IN A TRY/CATCH
+async function writeAwsConfig(configItem){
+  try{
+    return AwsResource.create({resource_id: configItem.resourceId })
+  } catch (error){
+    return console.log("Failed to write Aws configItem")
+  }
+}
+//==============================
 
 // Main app
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

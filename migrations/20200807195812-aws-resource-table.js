@@ -17,7 +17,7 @@ exports.setup = function(options, seedLink) {
 exports.up = function(db,callback) {
   db.createTable("aws_resources", {
     id:{
-      type: "int",
+      type: "text",
       primaryKey:true
     },
     resource_id:{
