@@ -5,7 +5,6 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Sequelize, DataTypes } = require('sequelize');
 const createUser = require('./create-user/create-user.js')
-const axios = require('axios');
 const aws = require('aws-sdk');
 const zlib = require('zlib');
 
@@ -46,25 +45,32 @@ app.post('/signup', (req, res) => {
 app.get('/login', (req, res) => res.sendStatus(200))
 
 
-// ======Data ingestion from S3 to DB====
+// ======AWS credentials ====
 const s3Params = {
   accessKeyId: credentials.id,  /* required */ 
   secretAccessKey: credentials.secret, /* required */ 
   Bucket: 'hoang-le-personal-data-bucket'
 }
+
 const filePath = 'AWSLogs/261786166738/Config/us-east-2/2020/8/6/ConfigHistory/261786166738_Config_us-east-2_ConfigHistory_AWS::EC2::InternetGateway_20200806T183059Z_20200806T183059Z_1.json.gz'
-const s3 = new aws.S3(s3Params)
-const readStream = s3.getObject({
-  Bucket: s3Params.Bucket,
-  Key: filePath
-}).createReadStream().pipe(zlib.createGunzip())
-readStream.on('data', chunk => {
-  const json = decodeChunk(chunk);
-  if(json != null) {
-    json.configurationItems.map(item => writeAwsConfig({resourceId: item.resourceId}))
-  }
-  return console.log("Done with this chunk")
-})
+  
+streamFromS3ToDB(filePath, s3Params)
+
+// ======Data ingestion from S3 to DB====
+function streamFromS3ToDB(s3Path, awsCredentials) {
+  const s3 = new aws.S3(awsCredentials)
+  const readStream = s3.getObject({
+    Bucket: awsCredentials.Bucket,
+    Key: s3Path
+  }).createReadStream().pipe(zlib.createGunzip())
+  readStream.on('data', chunk => {
+    const json = decodeChunk(chunk);
+    if(json != null) {
+      json.configurationItems.map(item => writeAwsConfig({resourceId: item.resourceId}))
+    }
+    return console.log("Done with this chunk")
+  })
+}
 
 // Json decoder
 function decodeChunk(chunk) {
