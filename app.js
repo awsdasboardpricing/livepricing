@@ -36,7 +36,7 @@ app.use(bodyParser.json());
 app.use(cors({origin: true, credentials: true}));
 
 // REST ROUTES
-app.get('/', (req, res) => res.json({ message: 'Hello World' }))
+app.get('/', (req, res) => res.json({ message: 'health check' }))
 app.post('/signup', (req, res) => {
     createUser(req.body)
     res.json({ message: 'from signup' })
@@ -52,11 +52,9 @@ const s3Params = {
   Bucket: 'hoang-le-personal-data-bucket'
 }
 
-const filePath = 'AWSLogs/261786166738/Config/us-east-2/2020/8/6/ConfigHistory/261786166738_Config_us-east-2_ConfigHistory_AWS::EC2::InternetGateway_20200806T183059Z_20200806T183059Z_1.json.gz'
-  
+// ======Data ingestion from S3 to DB====
 streamFromS3ToDB(filePath, s3Params)
 
-// ======Data ingestion from S3 to DB====
 function streamFromS3ToDB(s3Path, awsCredentials) {
   const s3 = new aws.S3(awsCredentials)
   const readStream = s3.getObject({
