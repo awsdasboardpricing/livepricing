@@ -50,8 +50,8 @@ app.post('/signup', (req, res) => {
 app.get('/login', (req, res) => res.sendStatus(200))
 
 app.post('/s3persist', (req, res) => {
-  const filePath = req.body.filePath
-  streamFromS3ToDB(filePath,s3Params)
+  const s3Path = req.body.filePath
+  streamFromS3ToDB(s3Path,s3Params)
   return res.sendStatus(200)
 })
 
