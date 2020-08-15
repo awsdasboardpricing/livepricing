@@ -23,6 +23,11 @@ const sequelize = new Sequelize('hle', 'hle', 'vanmaibenem2829', {
 const credentials = {
   id: process.env.AWS_ACCESS_KEY_ID,
   secret: process.env.AWS_SECRET_ACCESS_KEY
+}// ======AWS credentials ====
+const s3Params = {
+  accessKeyId: credentials.id,  /* required */ 
+  secretAccessKey: credentials.secret, /* required */ 
+  Bucket: 'hoang-le-personal-data-bucket'
 }
 // ================
 
@@ -44,16 +49,17 @@ app.post('/signup', (req, res) => {
 
 app.get('/login', (req, res) => res.sendStatus(200))
 
-
-// ======AWS credentials ====
-const s3Params = {
-  accessKeyId: credentials.id,  /* required */ 
-  secretAccessKey: credentials.secret, /* required */ 
-  Bucket: 'hoang-le-personal-data-bucket'
-}
+app.post('/s3persist', (req, res) => {
+  const filePath = req.body.filePath
+  const parse = streamFromS3ToDB(filePath,s3Params)
+  if (parse != null){
+    return res.sendStatus(200)
+  }
+  return res.sendStatus(400)
+})
 
 // ======Data ingestion from S3 to DB====
-streamFromS3ToDB(filePath, s3Params)
+// streamFromS3ToDB(filePath, s3Params)
 
 function streamFromS3ToDB(s3Path, awsCredentials) {
   const s3 = new aws.S3(awsCredentials)
