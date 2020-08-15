@@ -44,23 +44,18 @@ app.use(cors({origin: true, credentials: true}));
 app.get('/', (req, res) => res.json({ message: 'health check' }))
 app.post('/signup', (req, res) => {
     createUser(req.body)
-    res.json({ message: 'from signup' })
+    return res.json({ message: 'from signup' })
 })
 
 app.get('/login', (req, res) => res.sendStatus(200))
 
 app.post('/s3persist', (req, res) => {
   const filePath = req.body.filePath
-  const parse = streamFromS3ToDB(filePath,s3Params)
-  if (parse != null){
-    return res.sendStatus(200)
-  }
-  return res.sendStatus(400)
+  streamFromS3ToDB(filePath,s3Params)
+  return res.sendStatus(200)
 })
 
 // ======Data ingestion from S3 to DB====
-// streamFromS3ToDB(filePath, s3Params)
-
 function streamFromS3ToDB(s3Path, awsCredentials) {
   const s3 = new aws.S3(awsCredentials)
   const readStream = s3.getObject({
